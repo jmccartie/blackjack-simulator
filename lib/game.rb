@@ -4,7 +4,7 @@ class Game
   
   attr_accessor :player, :dealer, :bet, :status
 
-  def initialize(verbose)
+  def initialize(verbose=false)
     @verbose = verbose
     # @cash 
     @bet = BASE_BET
@@ -21,8 +21,6 @@ class Game
       player.cards << @deck.deal_card!
       dealer.cards << @deck.deal_card!
     end
-
-    # player.cards = ["A", "A"]
 
     if @verbose == true
       puts "Player cards = #{player}"
@@ -43,10 +41,6 @@ class Game
       puts "Push" if @verbose == true
       self.status = "push"
       return  true
-    elsif !dealer.blackjack? && player.blackjack?
-      self.status = "win"
-      puts "Blackjack! You win!" if @verbose == true
-      return true 
     end
 
     decision = Decision::decide(player, dealer.first_card_as_int)
@@ -98,7 +92,7 @@ class Game
 
   def dealer_turn(dealer)
     while dealer.total < 17
-      return "Bust" if dealer.bust?
+      # return "Bust" if dealer.bust?
       dealer.cards << @deck.deal_card!
     end
   end
