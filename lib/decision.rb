@@ -1,7 +1,8 @@
 module Decision
 
   def self.decide(hand, dealer_card)
-    return "Bust" if hand.total > 21
+    return "Bust" if hand.bust?
+    return "Blackjack" if hand.blackjack?
     dealer_card = Hand::card_to_integer(dealer_card)
     if hand.has_pair? && self.split_pair?(hand.cards, dealer_card) # Pair spliting
       return "Split"
@@ -54,10 +55,8 @@ module Decision
   end
 
 
-  def self.soft_total(hand, dealer_hand)
-    cards = hand.cards
-    cards.delete("A")
-    card = cards.first.to_i
+  def self.soft_total(hand, dealer_hand)    
+    card = (hand.cards - ["A"]).first.to_i
     # binding.pry
     case card
     when 9
@@ -73,6 +72,7 @@ module Decision
     when 2..3
       dealer_hand.between?(5,6) ? "Double down" : "Hit"
     else
+      binding.pry
       raise "Soft total error"
     end
   end

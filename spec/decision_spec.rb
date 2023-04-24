@@ -4,6 +4,14 @@ RSpec.describe Decision do
     @hand = Hand.new
   end
 
+
+  describe 'blackjack' do 
+    it 'returns blackjack if hand is already blackjack' do 
+      @hand.cards = ["K", "A"]
+      expect(Decision::decide(@hand, "A")).to eq "Blackjack"
+    end
+  end
+
   describe 'bust' do 
     it 'returns bust if hand is over 21' do 
       @hand.cards = ["K", "K", "K"]
@@ -43,6 +51,11 @@ RSpec.describe Decision do
     it 'returns double down if A,8 against 6' do 
       @hand.cards = ["A", "8"]
       expect(Decision::decide(@hand, "6")).to eq "Double down"
+    end 
+
+    it 'returns hit if A,7 against 10' do 
+      @hand.cards = ["A", "7"]
+      expect(Decision::decide(@hand, "10")).to eq "Hit"
     end
   end
 

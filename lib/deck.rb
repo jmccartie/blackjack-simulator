@@ -5,30 +5,15 @@ class Deck
   def initialize(deck_count=1)
     @deck_count = deck_count
     @cards = create_new_deck(deck_count)
-    @cut_card_found = false
   end
-
-  def shuffle_if_needed
-    if @cut_card_found == true 
-      @cards = create_new_deck(@deck_count)
-      @cut_card_found = false
-      return true
-    end
-    return false
-  end
-
 
   def deal_card!
-    card = @cards.shift
-
-    if card == "CUT"
-      @cut_card_found = true
-      card = @cards.shift
+    if @cards.empty?
+      @cards = create_new_deck(@deck_count)
     end
 
-    card
+    @cards.shift
   end
-
 
 
   private 
@@ -44,15 +29,7 @@ class Deck
     end
 
     deck.flatten!
-    place_cut_card(deck)
     deck.shuffle
   end
-
-  # Place the cut card between cards 15 and 37 
-  def place_cut_card(deck)
-    placement = rand(15..(deck.size-15))
-    deck.insert(placement, "CUT")
-  end
-
 
 end

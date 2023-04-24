@@ -1,15 +1,15 @@
 require 'pry'
-require_relative 'hand'
-require_relative 'game'
-require_relative 'decision'
-require_relative 'deck'
+require_relative './lib/hand'
+require_relative './lib/game'
+require_relative './lib/decision'
+require_relative './lib/deck'
 
 
 @wins = 0
 @losses = 0
-@rounds = 1_000_000 
+@rounds = 10_000 
 
-g = Game.new(verbose=false)
+g = Game.new(false)
 g.bet = 5
 @rounds.times do |n|
   print "." if n % 1_000 == 0

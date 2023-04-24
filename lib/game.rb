@@ -70,6 +70,17 @@ class Game
     end
 
     # Results!
+    results(player, dealer)
+  end
+
+  def dealer_turn(dealer)
+    while dealer.total < 17
+      # return "Bust" if dealer.bust?
+      dealer.cards << @deck.deal_card!
+    end
+  end
+
+  def results(player, dealer)
     if dealer.bust?
       self.status = "win"
       puts "Dealer busts! You win!" if @verbose == true
@@ -85,15 +96,6 @@ class Game
     else
       self.status = "win"
       puts "You win!" if @verbose == true
-    end
-
-    @deck.shuffle_if_needed
-  end
-
-  def dealer_turn(dealer)
-    while dealer.total < 17
-      # return "Bust" if dealer.bust?
-      dealer.cards << @deck.deal_card!
     end
   end
 
