@@ -7,7 +7,7 @@ require_relative './lib/deck'
 @rounds = 500
 
 g = Game.new(base_bet: 3, max_bet: 500)
-# g.bet = 5
+
 @rounds.times do |n|
   g.play! 
 end
