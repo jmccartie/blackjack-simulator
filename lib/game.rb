@@ -30,13 +30,11 @@ class Game
 
   def win!    
     self.bankroll += (self.bet * 2)
-    # puts "Winner! #{self.bet}. Bankroll: #{self.bankroll}"
     reset_bet!
   end
 
   def lose!
     self.bankroll -= self.bet
-    # puts "*** You lose #{self.bet}. New bank: #{self.bankroll}"
     raise "You ran out of money. Last bet: #{self.bet}." if self.bankroll <= 0
     # reset_bet!
     self.bet = [(self.bet * 2), max_bet].sort[0] #martingale. Double last bet unless table max
