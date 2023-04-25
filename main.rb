@@ -4,23 +4,13 @@ require_relative './lib/game'
 require_relative './lib/decision'
 require_relative './lib/deck'
 
+@rounds = 500
 
-@wins = 0
-@losses = 0
-@rounds = 10_000 
-
-g = Game.new(false)
-g.bet = 5
+g = Game.new(base_bet: 25, max_bet: 5000)
+# g.bet = 5
 @rounds.times do |n|
-  print "." if n % 1_000 == 0
   g.play! 
-  case g.status
-  when "win"
-    @wins += 1
-  when "lose"
-    @losses += 1
-  end
 end
 
 
-puts "\nWins = #{@wins} (#{(@wins.to_f/@rounds.to_f)*100}%)"
+puts "Winner! Bankroll $#{g.bankroll}"

@@ -1,13 +1,11 @@
 class Game
-
-  BASE_BET = 3
   
-  attr_accessor :player, :dealer, :bet, :status
+  attr_accessor :player, :dealer, :bet, :bankroll
+  attr_reader :base_bet, :max_bet
 
-  def initialize(verbose=false)
-    @verbose = verbose
-    # @cash 
-    @bet = BASE_BET
+  def initialize(base_bet:, max_bet: )
+    @bankroll = @max_bet = max_bet
+    @bet = @base_bet = base_bet
     @deck = Deck.new
     @player = Hand.new
     @dealer = Hand.new
@@ -30,16 +28,37 @@ class Game
     return dealer, player
   end
 
+  def win!    
+    self.bankroll += (self.bet * 2)
+    puts "Winner! #{self.bet}. Bankroll: #{self.bankroll}"
+    reset_bet!
+  end
+
+  def lose!
+    self.bankroll -= self.bet
+    puts "*** You lose #{self.bet}. New bank: #{self.bankroll}"
+    raise "You ran out of money. Last bet: #{self.bet}." if self.bankroll <= 0
+    # reset_bet!
+    self.bet = [(self.bet * 2), max_bet].sort[0] #martingale. Double last bet unless table max
+  end
+
+  def blackjack!
+    self.bankroll += (self.bet + (self.bet * 1.5))
+    reset_bet!
+  end
+
+  def reset_bet!
+    self.bet = self.base_bet
+  end
+
   def play!
     dealer, player = deal!
 
     if dealer.blackjack? && !player.blackjack?
-      puts "Dealer wins with blackjack." if @verbose == true
-      self.status = "lose"
+      lose!
       return true
     elsif dealer.blackjack? && player.blackjack?
-      puts "Push" if @verbose == true
-      self.status = "push"
+      # push. do nothing to status, but return immediately
       return  true
     end
 
@@ -51,51 +70,45 @@ class Game
     when "Double down"
       self.bet = self.bet * 2
       player.cards << @deck.deal_card!
-      dealer_turn(dealer)
     when "Stand"
-      dealer_turn(dealer)
+      # do nothing
     when "Split"
       first_hand = Hand.new([player.cards.first])
       hit_loop(first_hand)
       second_hand = Hand.new([player.cards.last])
       hit_loop(second_hand)
-      #TODO: run the hit loop on both hands. Figure out how to return a status if there are two wins (or two losses)
-      # Maybe make status a win count?
     end
 
     dealer_turn(dealer)
 
-    if @verbose == true
-      puts "Player hand: #{player.cards} (#{player.total}), Dealer hand: #{dealer.cards} (#{dealer.total})"
-    end
-
     # Results!
-    results(player, dealer)
+    if first_hand 
+      results(first_hand, dealer)
+      results(second_hand, dealer)
+    else 
+      results(player, dealer)
+    end
   end
 
   def dealer_turn(dealer)
     while dealer.total < 17
-      # return "Bust" if dealer.bust?
       dealer.cards << @deck.deal_card!
     end
   end
 
   def results(player, dealer)
-    if dealer.bust?
-      self.status = "win"
-      puts "Dealer busts! You win!" if @verbose == true
+    if player.blackjack? && !dealer.blackjack?
+      blackjack!
+    elsif dealer.bust?
+      win!
     elsif player.bust?
-      self.status = "lose"
-      puts "You bust!"  if @verbose == true
+      lose!
     elsif dealer.total > player.total
-      self.status = "lose"
-      puts "Dealer wins!" if @verbose == true
+      lose!
     elsif dealer.total == player.total
-      self.status = "push"
-      puts "Push" if @verbose == true
+      # Push. Do nothing.
     else
-      self.status = "win"
-      puts "You win!" if @verbose == true
+      win!
     end
   end
 

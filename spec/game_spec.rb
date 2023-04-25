@@ -1,6 +1,6 @@
 RSpec.describe Game do 
   before(:each) do 
-    @game = Game.new
+    @game = Game.new(base_bet: 3, max_bet: 1_000)
   end
 
   describe '#deal!' do 
@@ -19,17 +19,75 @@ RSpec.describe Game do
       allow(@game.dealer).to receive(:blackjack?).and_return(true)
       allow(@game.player).to receive(:blackjack?).and_return(false)
       @game.play!
-      expect(@game.status).to eq "lose"
+      expect(@game.bankroll).to eq 997
     end
 
     it 'returns a push if both the dealer and player has blackjack' do 
       allow(@game.dealer).to receive(:blackjack?).and_return(true)
       allow(@game.player).to receive(:blackjack?).and_return(true)
       @game.play!
-      expect(@game.status).to eq "push"
+      expect(@game.bankroll).to eq 1_000
     end
 
-    it 'plays two hands if initial decision is "split"'
+    it 'returns a win if we beat the dealer' do 
+      player = Hand.new(['K', 'K'])
+      dealer = Hand.new(['K', 'K', 'Q'])
+      allow(@game).to receive(:deal!).and_return([dealer, player])
+      @game.play!
+      expect(@game.bankroll).to eq 1_006
+    end
+
+    it 'returns a win with 3:2 payout for blackjack' do 
+      player = Hand.new(['A', 'K'])
+      dealer = Hand.new(['K', 'K', 'Q'])
+      allow(@game).to receive(:deal!).and_return([dealer, player])
+      @game.play!
+      expect(@game.bankroll).to eq 1_007.5
+    end
+
+    it 'plays two hands if initial decision is "split"' do 
+      # Don't split on K, K
+      player = Hand.new(['K', 'K'])
+      dealer = Hand.new(['3', 'K'])
+      allow(@game).to receive(:deal!).and_return([dealer, player])
+      expect(@game).to receive(:results).once
+      @game.play!
+
+      # Split on A, A
+      player = Hand.new(['A', 'A'])
+      dealer = Hand.new(['3', 'K'])
+      allow(@game).to receive(:deal!).and_return([dealer, player])
+      expect(@game).to receive(:results).twice
+      @game.play!
+    end
+  end
+
+  describe '#win!' do 
+    it 'adds the bet and winnings to the bankroll and resets bet'
+  end
+
+  describe '#lose!' do 
+    it 'subtracts bet from bankroll and doubles bet'
+    it 'never exceeds the table max'
+  end
+
+  describe '#results'
+
+  describe '#blackjack!' do 
+    it 'adds bet to bankroll plus 3:2 winnings, and resets bet' do 
+      @game.bet = 8
+      @game.blackjack!
+      expect(@game.bankroll).to eq 1_020
+      expect(@game.bet).to eq 3
+    end
+  end
+
+  describe '#reset_bet!' do 
+    it 'resets the bet' do 
+      @game.bet = 500
+      @game.reset_bet!
+      expect(@game.bet).to eq 3
+    end
   end
 
   describe '#dealer_turn' do 
