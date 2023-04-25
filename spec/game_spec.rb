@@ -63,15 +63,84 @@ RSpec.describe Game do
   end
 
   describe '#win!' do 
-    it 'adds the bet and winnings to the bankroll and resets bet'
+    it 'adds the bet and winnings to the bankroll and resets bet' do 
+      @game.bet = 50
+      @game.win!
+      expect(@game.bankroll).to eq 1_100
+      expect(@game.bet).to eq 3
+    end
   end
 
   describe '#lose!' do 
-    it 'subtracts bet from bankroll and doubles bet'
-    it 'never exceeds the table max'
+    it 'subtracts bet from bankroll and doubles bet' do 
+      @game.bet = 50 
+      @game.lose!
+      expect(@game.bankroll).to eq 950
+      expect(@game.bet).to eq 100
+    end
+
+    it 'never exceeds the table max' do 
+      @game.bankroll = 5000
+      @game.bet = 1500
+      @game.lose! 
+      expect(@game.bet).to eq 1_000
+    end
   end
 
-  describe '#results'
+  describe '#results' do 
+    before(:each) do 
+      allow(@game.dealer).to receive(:blackjack?).and_return(false)
+      allow(@game.player).to receive(:blackjack?).and_return(false)
+    end
+
+    it 'handles blackjack' do 
+      allow(@game.player).to receive(:blackjack?).and_return(true)
+      expect(@game).to receive(:blackjack!)
+      @game.results(@game.player, @game.dealer)
+    end
+
+    it 'handles a dealer bust' do 
+      allow(@game.dealer).to receive(:bust?).and_return(true)
+      expect(@game).to receive(:win!)
+      @game.results(@game.player, @game.dealer)
+    end
+
+    it 'handles a player bust' do 
+      allow(@game.dealer).to receive(:bust?).and_return(false)
+      allow(@game.player).to receive(:bust?).and_return(true)
+      expect(@game).to receive(:lose!)
+      @game.results(@game.player, @game.dealer)
+    end
+
+    it 'handles when dealer total is higher than player' do 
+      allow(@game.dealer).to receive(:bust?).and_return(false)
+      allow(@game.player).to receive(:bust?).and_return(false)
+      allow(@game.dealer).to receive(:total).and_return 21
+      allow(@game.player).to receive(:total).and_return 20
+      expect(@game).to receive(:lose!)
+      @game.results(@game.player, @game.dealer)
+    end
+
+    it 'handles a push' do 
+      allow(@game.dealer).to receive(:bust?).and_return(false)
+      allow(@game.player).to receive(:bust?).and_return(false)
+      allow(@game.dealer).to receive(:total).and_return 21
+      allow(@game.player).to receive(:total).and_return 21
+      expect(@game).to_not receive(:lose!)
+      expect(@game).to_not receive(:win!)
+      expect(@game).to_not receive(:blackjack!)
+      @game.results(@game.player, @game.dealer)
+    end
+
+    it 'handles when player total is higher than dealer' do 
+      allow(@game.dealer).to receive(:bust?).and_return(false)
+      allow(@game.player).to receive(:bust?).and_return(false)
+      allow(@game.dealer).to receive(:total).and_return 20
+      allow(@game.player).to receive(:total).and_return 21
+      expect(@game).to receive(:win!)
+      @game.results(@game.player, @game.dealer)
+    end
+  end
 
   describe '#blackjack!' do 
     it 'adds bet to bankroll plus 3:2 winnings, and resets bet' do 
