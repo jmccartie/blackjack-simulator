@@ -20,11 +20,6 @@ class Game
       dealer.cards << @deck.deal_card!
     end
 
-    if @verbose == true
-      puts "Player cards = #{player}"
-      puts "Dealer cards = #{dealer}"
-    end
-
     return dealer, player
   end
 
@@ -115,7 +110,6 @@ class Game
   def hit_loop(hand)
     hand.cards << @deck.deal_card!
     while !["Stand", "Bust"].include?(Decision::decide(hand, dealer.first_card_as_int))
-      puts "(Hit loop) #{Decision::decide(hand, dealer.first_card_as_int)}"  if @verbose == true
       hand.cards << @deck.deal_card!
     end
     hand
